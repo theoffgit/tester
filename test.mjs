@@ -18,18 +18,6 @@ const checkStatus = response => {
 
 // End Error Handle
 
-const body = {
-  "userData": {
-    "phone": "9265126677",
-//    "name": "Николай",
-//    "timezone": "Europe/Saratov",
-//    "config": {
-//      "phoneCode": "7"
-//    }
-  },
-  "preventSendSms": true,
-  "disableTimeout": true
-};
 
 // ROUTES
 
@@ -58,10 +46,11 @@ const userAuth = async thread =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
-        //console.log(response.headers.raw()['set-cookie']);
-        const cookie = ((response.headers.raw()['set-cookie'])[0]).split(';')
-        return {theurl: thread.theurl, phone: thread.phone, code: data.data.code, cookie: cookie[0]};
+        const cookie = ((response.headers.raw()['set-cookie'])[0]).split(';');
+        thread.cookie = cookie[0];
+        thread.code = data.data.code;
+        thread.lastresp = data.data;
+        return thread;
     } catch (error) {
         console.error(error);
         const errorBody = await error.response.text();
@@ -85,10 +74,10 @@ const userCode = async thread =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
-        //console.log(response.headers.raw()['set-cookie']);
-        const cookie = ((response.headers.raw()['set-cookie'])[0]).split(';')
-        return {theurl: thread.theurl, phone: thread.phone, cookie: cookie[0]};
+        const cookie = ((response.headers.raw()['set-cookie'])[0]).split(';');
+        thread.cookie = cookie[0];
+        thread.lastresp = data.data;
+        return thread;
     } catch (error) {
         console.error(error);
         const errorBody = await error.response.text();
@@ -109,8 +98,8 @@ const userSession = async thread =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
         thread.userId = data.data.userId;
+        thread.lastresp = data.data;
         return thread;
     } catch (error) {
         console.error(error);
@@ -134,7 +123,7 @@ const userGetOne = async thread =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
+        thread.lastresp = data.data;
         return thread;
     } catch (error) {
         console.error(error);
@@ -181,8 +170,7 @@ const projectCreate = async thread =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
-        thread.projectId = data.data.id;
+        thread.lastresp = data.data;
         return thread;
     } catch (error) {
         console.error(error);
@@ -195,9 +183,9 @@ const projectCreate = async thread =>{
 
 // /project/addUser
 
-const projectAddUser = async (thread, theuserId) =>{
+const projectAddUser = async (thread, theprojectId, theuserId) =>{
     const body = {
-       "projectId": thread.projectId,
+       "projectId": theprojectId,
        "userId": theuserId,
        "userName": "Коля",
        "position": "Разработчик в Wazzup"
@@ -212,8 +200,8 @@ const projectAddUser = async (thread, theuserId) =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
-        return;
+        thread.lastresp = data.data;
+        return thread;
     } catch (error) {
         console.error(error);
         const errorBody = await error.response.text();
@@ -240,8 +228,8 @@ const projectTransfer = async (thread, theuserId) =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
-        return;
+        thread.lastresp = data.data;
+        return thread;
     } catch (error) {
         console.error(error);
         const errorBody = await error.response.text();
@@ -261,7 +249,7 @@ const projectGetOne = async (thread, theProjectId) =>{
     try {
         checkStatus(response);
         const data = await response.json();
-        console.log(data);
+        thread.lastresp = data.data;
         return thread;
     } catch (error) {
         console.error(error);
@@ -273,27 +261,200 @@ const projectGetOne = async (thread, theProjectId) =>{
 // end /project/getOne
 
 
+// /project/getExecutorsTasks
+
+const projectGetExecutorsTasks = async (thread) =>{
+    const body = {
+          "limit": 100,
+          "offset": 0
+    }
+
+    const response = await fetch(thread.theurl+'/project/getExecutorsTasks', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: {'Content-Type': 'application/json', 'Cookie': thread.cookie}
+    });
+
+    try {
+        checkStatus(response);
+        const data = await response.json();
+        thread.lastresp = data.data;
+        return thread;
+    } catch (error) {
+        console.error(error);
+        const errorBody = await error.response.text();
+        console.error(`Error body: ${errorBody}`);
+    }
+}
+// end /project/getExecutorsTasks
+
+
+
+// /task/create
+
+const taskCreate = async (thread, theProjectId, theuserId) =>{
+    const body = {
+       "projectId": theProjectId,
+       "taskData": {
+          "id": 0,
+          "title": "string",
+          "info": "string",
+          "groupId": 0,
+          "startTime": new Date(new Date().getTime() + 7 * 24 * 60 * 60 * 1000),
+          "endTime": new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000),
+          "timeType": "later",
+          "regular": {
+             "enabled": false,
+             "rule": "weekdays",
+             "weekdaysList": [
+                1,
+                2
+             ],
+             "origTaskId": 1
+          },
+          "userList": [
+             {
+                "userId": theuserId,
+                "role": "",
+                "status": ""
+             }
+          ],
+          "hashtagList": [
+              {
+                 "name": "family"
+              }
+          ],
+          "extSource": "Google Calendar",
+          "extDestination": "Telegram: 9266541231",
+          "execEndTime": new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000),
+          "execUserId": thread.userId,
+          "tickList": [
+             {
+                "text": "string",
+                "status": "ready"
+             }
+          ]
+       }
+    }
+    const response = await fetch(thread.theurl+'/task/create', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: {'Content-Type': 'application/json', 'Cookie': thread.cookie}
+    });
+
+    try {
+        checkStatus(response);
+        const data = await response.json();
+        thread.lastresp = data.data;
+        return thread;
+    } catch (error) {
+        console.error(error);
+        const errorBody = await error.response.text();
+        console.error(`Error body: ${errorBody}`);
+    }
+}
+// end /task/create
+
+
+
+
 // end ROUTES
 
-let threadOne = { theurl: "http://localhost:3000", phone: "9265126677"};
-let threadTwo = { theurl: "http://localhost:3000", phone: "9265126672"};
-threadOne = await userAuth(threadOne);
-console.log(threadOne);
-threadOne = await userCode(threadOne);
-console.log(threadOne);
-threadOne = await userSession(threadOne);
-console.log(threadOne);
-threadOne = await projectCreate(threadOne);
-console.log(threadOne);
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
 
-threadTwo = await userAuth(threadTwo);
-console.log(threadTwo);
-threadTwo = await userCode(threadTwo);
-console.log(threadTwo);
-threadTwo = await userSession(threadTwo);
-console.log(threadTwo);
 
-await projectAddUser(threadOne, threadTwo.userId);
-await userGetOne(threadTwo);
-await projectTransfer(threadOne, threadTwo.userId);
-await projectGetOne(threadTwo, threadOne.projectId);
+async function test1(){
+    //шаг 1. /user/auth (для обоих юзеров)
+    //шаг 2. /user/code (для обоих юзеров)
+    //шаг 3. /user/session (для обоих юзеров)
+    //шаг 4. /project/create (для юзера №1)
+    //шаг 5. /project/addUser (для юзера №1)
+    //шаг 6. /user/getOne (для юзера №2 - у него должен появиться проект из п.5)
+    //шаг 7. /project/transfer (для юзера №1)
+    //шаг 8. /project/getOne (для юзера №2 - он должен стать владельцем проекта)
+
+
+    let threadOne = { theurl: "http://localhost:3000", phone: "9265126677"};
+    let threadTwo = { theurl: "http://localhost:3000", phone: "9265126672"};
+
+
+    threadOne = await userAuth(threadOne);
+    threadOne = await userCode(threadOne);
+    threadOne = await userSession(threadOne);
+    threadOne = await projectCreate(threadOne);
+    let theProjectId = threadOne.lastresp.id;
+    console.log('CREATED PROJEST ID: ' + theProjectId);
+
+    threadTwo = await userAuth(threadTwo);
+    threadTwo = await userCode(threadTwo);
+    threadTwo = await userSession(threadTwo);
+
+    threadOne = await projectAddUser(threadOne, theProjectId, threadTwo.userId);
+    threadTwo = await userGetOne(threadTwo);
+    console.log(threadTwo.lastresp.projectList);
+
+    if(threadTwo.lastresp.projectList.some(elem => ( elem.projectId == theProjectId && elem.role == "member" && elem.userId == threadTwo.userId ))){
+        console.log( "projectAddUser OK!!");
+    }
+
+    threadOne = await projectTransfer(threadOne, threadTwo.userId);
+    threadTwo = await projectGetOne(threadTwo, threadOne.projectId);
+    console.log(threadTwo.lastresp.userList);
+
+    if(threadTwo.lastresp.userList.some(elem => ( elem.projectId == theProjectId && elem.role == "owner" && elem.userId == threadTwo.userId ))){
+        console.log('FINAL OK!!!');
+    }
+}
+
+
+async function test2(){
+    //шаг 1. /user/auth (для обоих юзеров)
+    //шаг 2. /user/code (для обоих юзеров)
+    //шаг 3. /user/session (для обоих юзеров)
+    //шаг 4. /project/addUser (для юзера №1)
+    //шаг 5. /task/create (для юзера №1 с указанием исполнителем юзера №2)
+    //шаг 6. /project/getExecutorsTasks (для юзера №1 - проверить что задача в этом списке)
+    //шаг 7. /user/changeCurrentProject (для юзера №2)
+    //шаг 8. /project/getInboxTasks (для юзера №2 - проверить что задача в этом списке)
+    //шаг 9. /project/update (для юзера №2 с указанием времени с отметкой о взятии в работу)
+    //шаг 10. /project/getScheduleTasks (для юзера №2 - проверить что задача теперь в этом списке)
+    //шаг 11. /task/execute (для юзера №2)
+    //шаг 12. /project/getInboxTasks (для юзера №1 - проверить что задача в этом списке)
+    //шаг 13. /task/execute (для юзера №1)
+    //шаг 14. /project/getOne (для юзера №1 - проверить что у задачи установлены exec-параметры)
+
+
+    let threadOne = { theurl: "http://localhost:3000", phone: "9265126611"};
+    let threadTwo = { theurl: "http://localhost:3000", phone: "9265126622"};
+
+
+    threadOne = await userAuth(threadOne);
+    threadOne = await userCode(threadOne);
+    threadOne = await userSession(threadOne);
+    let theProjectId = threadOne.lastresp.currentProjectId;
+    console.log('THE PROJEST ID: ' + theProjectId);
+
+    threadTwo = await userAuth(threadTwo);
+    threadTwo = await userCode(threadTwo);
+    threadTwo = await userSession(threadTwo);
+
+    threadOne = await projectAddUser(threadOne, theProjectId, threadTwo.userId);
+    console.log(threadOne);
+
+    threadOne = await taskCreate(threadOne, theProjectId, threadTwo.userId);
+    console.log(threadOne);
+
+    threadOne = await projectGetExecutorsTasks(threadOne);
+    console.log(threadOne);
+
+}
+
+test2();
+
+
+
+
+
+//test1();
