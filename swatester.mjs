@@ -136,6 +136,29 @@ const userGetOne = async thread =>{
 // end /user/getOne
 
 
+// /user/changeCurrentProject
+
+const userChangeCurrentProject = async (thread, theprojectId) =>{
+    console.log(thread.theurl+'/user/changeCurrentProject?projectId='+theprojectId);
+    const response = await fetch(thread.theurl+'/user/changeCurrentProject?projectId='+theprojectId, {
+        method: 'post',
+        headers: {'Cookie': thread.cookie}
+    });
+
+    try {
+        checkStatus(response);
+        const data = await response.json();
+        thread.lastresp = data.data;
+        return thread;
+    } catch (error) {
+        console.error(error);
+        const errorBody = await error.response.text();
+        console.error(`Error body: ${errorBody}`);
+    }
+}
+
+// end /user/changeCurrentProject
+
 
 // /project/create
 
@@ -179,6 +202,59 @@ const projectCreate = async thread =>{
     }
 }
 // end /project/create
+
+
+// /project/update
+const projectUpdate = async (thread, projectId) =>{
+    const body = {
+       "projectId": projectId,
+       "projectData": {
+           "title": "Проект №1",
+           "config": {},
+           "userList": [
+              {
+                 "userId": 0,
+                 "role": "owner",
+                 "userName": "Коля",
+                 "position": "Разработчик в Wazzup",
+                 "config": {
+                    "scheduleFilters": {
+                        "[ID проекта]": {
+                             "showAllTasks": true,
+                             "showTaskContent": true
+                          }
+                     }
+                 }
+             }
+          ]
+       },
+       "iconFile": {
+           "fileContent": "iVBORw0KGgoAAAANSUh...",
+           "fileMimetype": "image/jpeg",
+           "fileName": "picture.jpg",
+           "fileExtension": "jpg"
+        }
+    }
+
+
+
+    const response = await fetch(thread.theurl+'/project/update', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: {'Content-Type': 'application/json', 'Cookie': thread.cookie}
+    });
+    try {
+        checkStatus(response);
+        const data = await response.json();
+        thread.lastresp = data.data;
+        return thread;
+    } catch (error) {
+        console.error(error);
+        const errorBody = await error.response.text();
+        console.error(`Error body: ${errorBody}`);
+    }
+}
+// end /project/update
 
 
 // /project/addUser
@@ -290,6 +366,64 @@ const projectGetExecutorsTasks = async (thread) =>{
 
 
 
+// /project/getInboxTasks
+
+const projectGetInboxTasks = async (thread) =>{
+    const body = {
+          "filter": "new",
+          "limit": 100,
+          "offset": 0
+    }
+
+    const response = await fetch(thread.theurl+'/project/getInboxTasks', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: {'Content-Type': 'application/json', 'Cookie': thread.cookie}
+    });
+
+    try {
+        checkStatus(response);
+        const data = await response.json();
+        thread.lastresp = data.data;
+        return thread;
+    } catch (error) {
+        console.error(error);
+        const errorBody = await error.response.text();
+        console.error(`Error body: ${errorBody}`);
+    }
+}
+// end /project/getInboxTasks
+
+
+// /project/getScheduleTasks
+
+const projectGetScheduleTasks = async (thread) =>{
+    const body = {
+        "from": "2000-07-08",
+        "to": "2032-07-10"
+    }
+
+    const response = await fetch(thread.theurl+'/project/getScheduleTasks', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: {'Content-Type': 'application/json', 'Cookie': thread.cookie}
+    });
+
+    try {
+        checkStatus(response);
+        const data = await response.json();
+        thread.lastresp = data.data;
+        return thread;
+    } catch (error) {
+        console.error(error);
+        const errorBody = await error.response.text();
+        console.error(`Error body: ${errorBody}`);
+    }
+}
+// end /project/getScheduleTasks
+
+
+
 // /task/create
 
 const taskCreate = async (thread, theProjectId, theuserId) =>{
@@ -326,8 +460,8 @@ const taskCreate = async (thread, theProjectId, theuserId) =>{
           ],
           "extSource": "Google Calendar",
           "extDestination": "Telegram: 9266541231",
-          "execEndTime": new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000),
-          "execUserId": thread.userId,
+         // "execEndTime": NULL,
+         // "execUserId": "",
           "tickList": [
              {
                 "text": "string",
@@ -355,6 +489,31 @@ const taskCreate = async (thread, theProjectId, theuserId) =>{
 }
 // end /task/create
 
+// /task/execute
+
+const taskExecute = async (thread, theTaskId) =>{
+    const body = {
+        "taskId": theTaskId
+    }
+
+    const response = await fetch(thread.theurl+'/task/execute', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: {'Content-Type': 'application/json', 'Cookie': thread.cookie}
+    });
+
+    try {
+        checkStatus(response);
+        const data = await response.json();
+        thread.lastresp = data.data;
+        return thread;
+    } catch (error) {
+        console.error(error);
+        const errorBody = await error.response.text();
+        console.error(`Error body: ${errorBody}`);
+    }
+}
+// end /task/execute
 
 
 
@@ -416,7 +575,7 @@ async function test2(){
     //шаг 4. /project/addUser (для юзера №1)
     //шаг 5. /task/create (для юзера №1 с указанием исполнителем юзера №2)
     //шаг 6. /project/getExecutorsTasks (для юзера №1 - проверить что задача в этом списке)
-    //шаг 7. /user/changeCurrentProject (для юзера №2)
+    //шаг 7. /user/changeCurrentProject (для юзера №2)  - убить шаг!!!
     //шаг 8. /project/getInboxTasks (для юзера №2 - проверить что задача в этом списке)
     //шаг 9. /project/update (для юзера №2 с указанием времени с отметкой о взятии в работу)
     //шаг 10. /project/getScheduleTasks (для юзера №2 - проверить что задача теперь в этом списке)
@@ -426,8 +585,8 @@ async function test2(){
     //шаг 14. /project/getOne (для юзера №1 - проверить что у задачи установлены exec-параметры)
 
 
-    let threadOne = { theurl: "http://localhost:3000", phone: "9265126611"};
-    let threadTwo = { theurl: "http://localhost:3000", phone: "9265126622"};
+    let threadOne = { theurl: "http://localhost:3000", phone: "9265126339"};
+    let threadTwo = { theurl: "http://localhost:3000", phone: "9265126350"};
 
 
     threadOne = await userAuth(threadOne);
@@ -447,14 +606,16 @@ async function test2(){
     console.log(threadOne);
 
     threadOne = await projectGetExecutorsTasks(threadOne);
-    console.log(threadOne);
+    console.log(threadOne.lastresp.resultList);
+    if(threadOne.lastresp.resultList.some(elem => ( elem.projectId == theProjectId && ( elem.userList.some(el => (el.projectId == theProjectId && el.userId == threadTwo.userId )) )))){
+        console.log('projectGetExecutorsTasks OK!!!');
+    }
+    //threadTwo = await userChangeCurrentProject(threadTwo, theProjectId);
+    //console.log(threadTwo);
+    threadTwo = await projectGetInboxTasks(threadTwo);
+    console.log(threadTwo);
 
 }
 
-test2();
-
-
-
-
-
+//test2();
 //test1();
