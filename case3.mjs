@@ -2,6 +2,7 @@
 
 import fetch, { FormData, File, fileFrom } from 'node-fetch';
 import chalk from 'chalk';
+var theLastResp;
 
 async function echo(method, status){
     //console.log('echo');
@@ -10,6 +11,7 @@ async function echo(method, status){
     switch(status){
         case false:
             console.log(chalk.black.bgRed.bold('FAIL ') + method);
+            console.log(JSON.stringify(theLastResp));
             process.exit();
             return;
         case true:
@@ -66,6 +68,7 @@ async function theFetch(theMethod, theData, thread){
 
     const data = await response.json();
 //    console.log(data);
+    theLastResp = data;
     await check(theMethod, data);
 
     const respHeaders = await response.headers.raw();
@@ -112,9 +115,9 @@ async function case3(){
 //23. юзер №1: PersonChatsGet (с указанием с указанием чата с юзером №2 = ID из шага №6) - должен быть список с одним чатом, где unread_messages === 2 и в last_message сообщение из шага №14, у которого is_read === 1)
 
 
-    let threadOne = { theUrl: "https://festa.alef.show/api/index.php?alef_action=", phone: "+38 (050) 770-06-01", cookie: null};
-    let threadTwo = { theUrl: "https://festa.alef.show/api/index.php?alef_action=", phone: "+38 (050) 770-06-02", cookie: null};
-    let threadThree = { theUrl: "https://festa.alef.show/api/index.php?alef_action=", phone: "+38 (050) 770-06-03", cookie: null};
+    let threadOne = { theUrl: "https://festa.alef.show/api/index.php?alef_action=", phone: "+38 (050) 770-06-61", cookie: null};
+    let threadTwo = { theUrl: "https://festa.alef.show/api/index.php?alef_action=", phone: "+38 (050) 770-06-62", cookie: null};
+    let threadThree = { theUrl: "https://festa.alef.show/api/index.php?alef_action=", phone: "+38 (050) 770-06-63", cookie: null};
 
     console.log('//1. СОЗДАТЬ ЮЗЕРА (юзер №1)');
     threadOne = await theFetch("SmsPin", {phone: threadOne.phone, prevent_send_sms: "1" }, threadOne);
@@ -137,14 +140,16 @@ async function case3(){
     console.log('//4. юзер №1: PersonChatCreate (с указанием юзера №2)');
     threadOne = await theFetch("PersonChatCreate", {user_id: threadTwo.user.id }, threadOne);
     const chatId = threadOne.lastresp.id;
+    console.log(chatId);
 
     console.log('//5. юзер №1: PersonChatCreate (с указанием юзера №3)');
     threadOne = await theFetch("PersonChatCreate", {user_id: threadThree.user.id }, threadOne);
     const chatId2 = threadOne.lastresp.id;
+    console.log(chatId2);
 
     console.log('//6. юзер №1: PersonChatsGet - должно быть два чата');
     threadOne = await theFetch("PersonChatsGet", {}, threadOne);
-    if(threadOne.lastresp.chats.length < 2 || !threadOne.lastresp.chats.some(el => (el.id == chatId)) || !threadOne.lastresp.chats.some(el => (el.id == chatId2)) ){
+    if(threadOne.lastresp.chats.length < 2 || !threadOne.lastresp.chats.some(el => (el.chat.id == chatId)) || !threadOne.lastresp.chats.some(el => (el.chat.id == chatId2)) ){
         echo("PersonChatsGet чатов меньше двух или отсутствуют целевые чаты", false);
     }
 
@@ -153,20 +158,20 @@ async function case3(){
 
     console.log('//8. юзер №1: PersonChatsGet - должен остаться один чат');      //  если чатов изначально было 18 - хреновое условие - проверяем наличие целевого чата...
     threadOne = await theFetch("PersonChatsGet", {}, threadOne);
-    if(threadOne.lastresp.chats.some(el => (el.id == chatId2)) ){
+    if(threadOne.lastresp.chats.some(el => (el.chat.id == chatId2)) ){
         echo("PersonChatsGet целевой чат не убит... шаг 7 с PersonChatDelete не отработал", false);
     }
 
     console.log('//9. юзер №1: ChatMessageCreate (с указанием чата с юзером №2 = ID из шага №6 + с обязательным заполнением media_link)');   // из шага 4?!
-    threadOne = await theFetch("ChatMessageCreate", {chat_id: chatId, reply_id: '??' , text: 'некий текст сообщения', media_link: 'media_folder/abcdef.mp4'}, threadOne);
+    threadOne = await theFetch("ChatMessageCreate", {chat_id: chatId , text: 'некий текст сообщения', media_link: 'media_folder/abcdef.mp4'}, threadOne);
     const messId = threadOne.lastresp.id;
 
     console.log('//10. юзер №1: ChatMessageCreate (с указанием чата с юзером №2 = ID из шага №6 + с обязательным заполнением media_link)');
-    threadOne = await theFetch("ChatMessageCreate", {chat_id: chatId, reply_id: '??' , text: 'некий текст сообщения', media_link: 'media_folder/abcdef.mp4'}, threadOne);
+    threadOne = await theFetch("ChatMessageCreate", {chat_id: chatId , text: 'некий текст сообщения', media_link: 'media_folder/abcdef.mp4'}, threadOne);
     const messId2 = threadOne.lastresp.id;
 
     console.log('//11. юзер №1: ChatMessageUpdate (с указанием ID из шага №9 + с указанием media_link = 0)');
-    threadOne = await theFetch("ChatMessageUpdate", {id: messId, text: 'некий текст сообщения -измененный' , media_link: '0', reply_id: '??'}, threadOne);
+    threadOne = await theFetch("ChatMessageUpdate", {id: messId, text: 'некий текст сообщения -измененный' , media_link: 0}, threadOne);
 
     console.log('//12. юзер №2: PersonChatMessagesGet (с указанием чата с юзером №2 = ID из шага №6 + shift = 0 + count = 10) - должен отобразиться чат с двумя сообщениями, причем в первом media_link === NULL');
     threadOne = await theFetch("PersonChatMessagesGet", {id: chatId, shift:0, count:10}, threadOne);
@@ -202,9 +207,15 @@ async function case3(){
         echo("PersonChatMessagesGet шаг 17 ошибка 2", false);
     }
     threadTwo = await theFetch("PersonChatMessagesGet", {id: chatId, shift:4, count:1}, threadTwo);
-    if(threadTwo.lastresp.messages.length != 0){
+    if(threadTwo.lastresp.messages.length != 1){
         echo("PersonChatMessagesGet шаг 17 ошибка 3", false);
     }
+
+    threadTwo = await theFetch("PersonChatMessagesGet", {id: chatId, shift:5, count:1}, threadTwo);
+    if(threadTwo.lastresp.messages.length != 0){
+        echo("PersonChatMessagesGet шаг 17 ошибка 4", false);
+    }
+
 
     console.log('//18. юзер №1: PersonChatsGet (с указанием с указанием чата с юзером №2 = ID из шага №6) - должен быть список с одним чатом, где unread_messages === 5 и в last_message сообщение из шага №15, у которого reply_id === ID сообщения из шага №13)');
     //  параметров нет у метода - как я понял - должен быть чат с целевым айди и в нем  unread_messages == 5
