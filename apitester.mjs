@@ -1,8 +1,8 @@
 import fetch, { FormData } from "node-fetch";
-//import case0 from "./cases/case0.mjs";
-//import case1 from "./cases/case1.mjs";
-//import case2 from "./cases/case2.mjs";
-//import case3 from "./cases/case3.mjs";
+import case0 from "./cases/case0.mjs";
+import case1 from "./cases/case1.mjs";
+import case2 from "./cases/case2.mjs";
+import case3 from "./cases/case3.mjs";
 import case4 from "./cases/case4.mjs";
 
 let API_URL = "https://festa.alef.show/api/index.php?alef_action=";
@@ -79,16 +79,16 @@ const list = [
 //    await case2();
 //    console.log(`CASE №2 READY`);
 //  },
-//  async () => {
-//    console.log("CASE №3 STARTING");
-//    await case3();
-//    console.log("CASE №3 READY");
- // },
-  async () => {
-    console.log("CASE №4 STARTING");
-    await case4();
-    console.log("CASE №4 READY");
-  },
+ async () => {
+   console.log("CASE №3 STARTING");
+   await case3();
+   console.log("CASE №3 READY");
+ },
+  // async () => {
+  //   console.log("CASE №4 STARTING");
+  //   await case4();
+  //   console.log("CASE №4 READY");
+  // },
 ];
 
 for (const f of list)

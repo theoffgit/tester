@@ -128,7 +128,7 @@ export default async function () {
                    );
         }
     );
-    console.log('//7. юзер №1: PersonChatDelete (с указанием чата с юзером №3 = ID из шага №6)');   // из шага 5?!
+    console.log('//7. юзер №1: PersonChatDelete (с указанием чата с юзером №3 = ID из шага №6)');   // из шага 5?! (для чистоты эксперимента мы должны проверить, что PersonChatsGet в шаге 6 возвращает корректный id)
     threadOne = await theFetch(
         "PersonChatDelete",
         {
@@ -136,7 +136,7 @@ export default async function () {
         },
         threadOne
     );
-    console.log('//8. юзер №1: PersonChatsGet - должен остаться один чат');      //  если чатов изначально было 18 - хреновое условие - проверяем наличие целевого чата...
+    console.log('//8. юзер №1: PersonChatsGet - должен остаться один чат');      //  если чатов изначально было 18 - хреновое условие - проверяем наличие целевого чата... (18 чатов были до создания нового пользователя на каждый прогон теста)
     threadOne = await theFetch(
         "PersonChatsGet",
         {},
@@ -150,7 +150,7 @@ export default async function () {
 
 
 
-    console.log('//9. юзер №1: ChatMessageCreate (с указанием чата с юзером №2 = ID из шага №6 + с обязательным заполнением media_link)');   // из шага 4?!
+    console.log('//9. юзер №1: ChatMessageCreate (с указанием чата с юзером №2 = ID из шага №6 + с обязательным заполнением media_link)');   // из шага 4?! (для чистоты эксперимента мы должны проверить, что PersonChatsGet в шаге 6 возвращает корректный id)
     threadOne = await theFetch(
         "ChatMessageCreate",
         {
@@ -199,7 +199,7 @@ export default async function () {
                    );
         }
     );
-    console.log('//13. юзер №2: ChatMessageCreate (с указанием с указанием чата с юзером №2 = ID из шага №6 + reply_id = ID сообщения из шага №9)');  // из шага 4?!
+    console.log('//13. юзер №2: ChatMessageCreate (с указанием с указанием чата с юзером №2 = ID из шага №6 + reply_id = ID сообщения из шага №9)');  // из шага 4?! (для чистоты эксперимента мы должны проверить, что PersonChatsGet в шаге 6 возвращает корректный id)
     threadTwo = await theFetch(
         "ChatMessageCreate",
         {
@@ -223,7 +223,7 @@ export default async function () {
         threadTwo
     );
     const messId4 = threadTwo.lastresp.id;
-    console.log('//15. юзер №2: ChatMessageCreate (с указанием с указанием чата с юзером №2 = ID из шага №6 + reply_id = ID сообщения из шага №14)'); // самому себе ответ?!
+    console.log('//15. юзер №2: ChatMessageCreate (с указанием с указанием чата с юзером №2 = ID из шага №6 + reply_id = ID сообщения из шага №14)'); // самому себе ответ?! (да)
     threadTwo = await theFetch(
         "ChatMessageCreate",
         {
@@ -305,17 +305,18 @@ export default async function () {
                    );
         }
     );
-    console.log('//18. юзер №1: PersonChatsGet (с указанием с указанием чата с юзером №2 = ID из шага №6) - должен быть список с одним чатом, где unread_messages === 5 и в last_message сообщение из шага №15, у которого reply_id === ID сообщения из шага №13)');
+    console.log('//18. юзер №1: PersonChatsGet (с указанием с указанием чата с юзером №2 = ID из шага №6) - должен быть список с одним чатом, где unread_messages === 3 и в last_message сообщение из шага №15, у которого reply_id === ID сообщения из шага №13)'); // поменял на unread_messages === 3
     threadOne = await theFetch(
         "PersonChatsGet",
         {},
         threadOne,
         (result) => {
+            // !!! иногда тут появляются два чата с  одним и тем же id, но с разными last_message
             return (
                        result.chats.length == 1 &&
-                       result.chats.unread_messages == 5 &&
-                       result.chats.last_message.id == messId5 &&
-                       result.chats.last_message.reply_id == messId3
+                       result.chats[0].unread_messages == 3 &&
+                       result.chats[0].last_message.id == messId5 &&
+                       result.chats[0].last_message.reply_id == messId3
                    );
         }
     );
@@ -328,14 +329,14 @@ export default async function () {
         threadTwo
     );
     console.log('//20. юзер №2: ChatMessageRead (с указанием сообщения из шага №14)');
-    threadTwo = await theFetch(
+    threadOne = await theFetch(
         "ChatMessageRead",
         {
             id: messId4,
         },
-        threadTwo
+        threadOne
     );
-    console.log('//21. юзер №1: PersonChatsGet (с указанием с указанием чата с юзером №2 = ID из шага №6) - должен быть список с одним чатом, где unread_messages === 3 и в last_message сообщение из шага №15, у которого reply_id === NULL)');
+    console.log('//21. юзер №1: PersonChatsGet (с указанием с указанием чата с юзером №2 = ID из шага №6) - должен быть список с одним чатом, где unread_messages === 1 и в last_message сообщение из шага №15, у которого reply_id === NULL)'); // поменял на unread_messages === 1
     threadOne = await theFetch(
         "PersonChatsGet",
         {},
@@ -343,8 +344,9 @@ export default async function () {
         (result) => {
             return (
                        result.chats.length == 1 &&
-                       result.chats.last_message.id == messId5 &&
-                       result.chats.last_message.reply_id === null
+                       result.chats[0].unread_messages == 1 &&
+                       result.chats[0].last_message.id == messId5 &&
+                       result.chats[0].last_message.reply_id === null
                    );
         }
     );
@@ -364,8 +366,8 @@ export default async function () {
         (result) => {
             return (
                         result.chats.length ==  1 &&
-                        result.chats.last_message.id == messId4 &&
-                        result.chats.last_message.is_read == 1
+                        result.chats[0].last_message.id == messId4 &&
+                        result.chats[0].last_message.is_read == 1
                    );
         }
     );
