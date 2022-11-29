@@ -16,8 +16,8 @@ export default async function () {
   );
   const thePin = threadOne.lastresp.pin;
   threadOne = await theFetch(
-    "SignIn",
-    { phone: threadOne.phone, pin: thePin },
+    "SignUp",
+    { phone: threadOne.phone, pin: thePin, name: "Фиолетта Судноплатова", birthday: "1987-11-11"},
     threadOne
   );
 
