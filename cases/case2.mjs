@@ -33,8 +33,8 @@ export default async function () {
   );
   const thePin = threadOne.lastresp.pin;
   threadOne = await theFetch(
-    "SignIn",
-    { phone: threadOne.phone, pin: thePin },
+    "SignUp",
+    { phone: threadOne.phone, pin: thePin, name: "Фиолетта Судноплатова", birthday: "1987-11-11"},
     threadOne
   );
   threadOne.user = threadOne.lastresp.user;
@@ -46,8 +46,8 @@ export default async function () {
   );
   const thePin2 = threadTwo.lastresp.pin;
   threadTwo = await theFetch(
-    "SignIn",
-    { phone: threadTwo.phone, pin: thePin2 },
+    "SignUp",
+    { phone: threadTwo.phone, pin: thePin2, name: "Фиолетта Судноплатова", birthday: "1987-11-11"},
     threadTwo
   );
   threadTwo.user = threadTwo.lastresp.user;
@@ -69,7 +69,13 @@ export default async function () {
   threadOne = await theFetch(
     "AdHocGetByID",
     { event_id: firstEventId },
-    threadOne
+    threadOne,
+        (result) => {
+            return (
+                        result.adhoc !==  undefined
+                   );
+        }
+
   );
   console.log("//5. юзер №1: AdHocCreate (с указанием юзера №2)");
   threadOne = await theFetch(
@@ -98,7 +104,13 @@ export default async function () {
   console.log(
     "//7. юзер №2: AdHocsGet - должно быть два AdHoc-события (второе с измененными данными)"
   );
-  threadTwo = await theFetch("AdHocsGet", {}, threadTwo);
+  threadTwo = await theFetch("AdHocsGet", {}, threadTwo, (result) => {
+            return (
+                        result.adhocs.length == 2 &&
+                        result.adhocs.some(el => (el.event.title == 'Second Event Title Updated'))
+                   );
+        }
+  );
   console.log("//8. юзер №1: AdHocDelete (с ID из шага №3)");
   threadOne = await theFetch(
     "AdHocDelete",
@@ -106,7 +118,12 @@ export default async function () {
     threadOne
   );
   console.log("//9. юзер №1: AdHocsGet - должно быть одно AdHoc-событие");
-  threadOne = await theFetch("AdHocsGet", {}, threadOne);
+  threadOne = await theFetch("AdHocsGet", {}, threadOne, (result) => {
+            return (
+                        result.adhocs.length == 1
+                   );
+        }
+  );
   console.log(
     "//10. юзер №2: InvitesGet - должно быть два приглашения и у удаленного на шаге №8 приглашения должен стоять status === deleted"
   );
@@ -130,7 +147,12 @@ export default async function () {
   threadTwo = await theFetch(
     "InviteGetByID",
     { invite_id: inviteId },
-    threadTwo
+    threadTwo,
+    (result) => {
+            return (
+                        result.invite !== undefined
+                   );
+        }
   );
   console.log(
     "//12. юзер №2: UpcomingEventsGet - должно быть два события и у удаленного на шаге №8 приглашения должен стоять status === deleted, а второго status===upcoming и participate===null"
@@ -161,7 +183,13 @@ export default async function () {
   threadTwo = await theFetch(
     "UpcomingEventGetByID",
     { upcoming_event_id: upcomingEvent.id },
-    threadTwo
+    threadTwo,
+    (result) => {
+            return (
+                        result.upcoming_event !== undefined &&
+                        result.upcoming_event.participate == 1
+                   );
+        }
   );
   console.log("//15. юзер №2: UpcomingEventDelete (с ID из шага №10)");
   threadTwo = await theFetch(
