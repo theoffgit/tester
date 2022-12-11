@@ -7,6 +7,7 @@ import case4 from "./cases/case4.mjs";
 import case5 from "./cases/case5.mjs";
 import case6 from "./cases/case6.mjs";
 import case7 from "./cases/case7.mjs";
+import case8 from "./cases/case8.mjs";
 
 let API_URL = "https://festa.alef.show/api/index.php?alef_action=";
 API_URL = "http://localhost/festaa/api/index.php?alef_action=";
@@ -102,10 +103,15 @@ const list = [
 //     await case6();
 //     console.log("CASE №6 READY");
 //   },
+//  async () => {
+//    console.log("CASE №7 STARTING");
+//    await case7();
+//    console.log("CASE №7 READY");
+//  },
   async () => {
-    console.log("CASE №7 STARTING");
-    await case7();
-    console.log("CASE №7 READY");
+    console.log("CASE №8 STARTING");
+    await case8();
+    console.log("CASE №8 READY");
   },
 ];
 

@@ -200,7 +200,7 @@ export default async function () {
         {
             congratulation_id: congratulationId,
             event_user_id: threadThree.user.id,
-            event_time: "24.02.2024 14:00",
+            //event_time: "24.02.2024 14:00",
             text: "текст поздравления изменено",
             video: "http://localhost/somevideo/updated",
 
