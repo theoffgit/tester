@@ -6,9 +6,10 @@ import case3 from "./cases/case3.mjs";
 import case4 from "./cases/case4.mjs";
 import case5 from "./cases/case5.mjs";
 import case6 from "./cases/case6.mjs";
+import case7 from "./cases/case7.mjs";
 
 let API_URL = "https://festa.alef.show/api/index.php?alef_action=";
-// apiUrl = "http://festa/api/index.php?alef_action=";
+API_URL = "http://localhost/festaa/api/index.php?alef_action=";
 
 export async function theFetch(theMethod, theData, thread, check = 0) {
   const formData = new FormData();
@@ -96,11 +97,16 @@ const list = [
 //     await case5();
 //     console.log("CASE №5 READY");
 //   },
-   async () => {
-     console.log("CASE №6 STARTING");
-     await case6();
-     console.log("CASE №6 READY");
-   },
+//   async () => {
+//     console.log("CASE №6 STARTING");
+//     await case6();
+//     console.log("CASE №6 READY");
+//   },
+  async () => {
+    console.log("CASE №7 STARTING");
+    await case7();
+    console.log("CASE №7 READY");
+  },
 ];
 
 for (const f of list)

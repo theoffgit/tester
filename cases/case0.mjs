@@ -11,29 +11,13 @@ export default async function () {
   let threadOne = { phone, cookie: null };
   threadOne = await theFetch(
     "SmsPin",
-    { phone: threadOne.phone, prevent_send_sms: "1" },
+    { phone: threadOne.phone, prevent_send_sms: "1", registration: "1" },
     threadOne
   );
   const thePin = threadOne.lastresp.pin;
   threadOne = await theFetch(
-    "SignUp",
-    { phone: threadOne.phone, pin: thePin, name: "Фиолетта Судноплатова", birthday: "1987-11-11"},
+    "SignIn",
+    { phone: threadOne.phone, pin: thePin},
     threadOne
   );
-
-  // const formData = new FormData();
-  // const binary = new Uint8Array([97, 98, 99]);
-  // const abc = new File([binary], "380507770108.jpg", { type: "text/plain" });
-  // formData.set(
-  //   "contacts",
-  //   '[{"nickname":"Masha","phone":"+38 (099) 800-12-12"},{"nickname":"Vasya777","phone":"+38 (050) 777-01-08"}]'
-  // );
-  // formData.set("avatars[]", abc, "+380507770108.jpg");
-  // const response = await fetch(`${apiUrl}ContactsSync!`, {
-  //   method: "POST",
-  //   body: formData,
-  //   headers: { Cookie: threadOne.cookie },
-  // });
-  // const data = await response.json();
-  // console.log({ data });
 }
